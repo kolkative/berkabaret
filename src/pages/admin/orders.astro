@@ -2,10 +2,22 @@
 import Base from '../../layouts/Base.astro';
 import { supabaseAdmin } from '../../lib/supabase';
 
-// Simple auth via secret query param
-const secret = Astro.url.searchParams.get('secret');
-if (secret !== import.meta.env.ADMIN_SECRET) {
-  return new Response('Unauthorized', { status: 401 });
+const adminSecret = import.meta.env.ADMIN_SECRET;
+const secretParam = Astro.url.searchParams.get('secret');
+const hasCookie = Astro.cookies.get('admin_session')?.value === 'true';
+
+if (secretParam === adminSecret) {
+  Astro.cookies.set('admin_session', 'true', {
+    path: '/admin',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24,
+  });
+}
+
+if (!hasCookie && secretParam !== adminSecret) {
+  return Astro.redirect('/admin/login');
 }
 
 const page = parseInt(Astro.url.searchParams.get('page') ?? '1');
@@ -40,13 +52,19 @@ const statusColors: Record<string, string> = {
         <h1 class="font-display font-extrabold text-3xl mb-1">Dashboard Admin</h1>
         <p class="text-gray-500 text-sm">Total: {count} orders</p>
       </div>
+      <a
+        href="/api/admin/logout"
+        class="rounded-xl border border-dark-600/60 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:border-brand-500 hover:text-white"
+      >
+        Logout
+      </a>
     </div>
 
     <!-- Filter -->
     <div class="flex gap-2 mb-6 flex-wrap">
       {['all', 'PENDING', 'PAID', 'EXPIRED', 'CANCELLED'].map(s => (
         <a
-          href={`/admin/orders?secret=${secret}&status=${s}`}
+          href={`/admin/orders?status=${s}`}
           class={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
             statusFilter === s
               ? 'bg-brand-600 border-brand-500 text-white'
@@ -123,7 +141,7 @@ const statusColors: Record<string, string> = {
       <div class="flex justify-center gap-2 mt-6">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
           <a
-            href={`/admin/orders?secret=${secret}&status=${statusFilter}&page=${p}`}
+            href={`/admin/orders?status=${statusFilter}&page=${p}`}
             class={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-colors ${
               page === p
                 ? 'bg-brand-600 text-white'

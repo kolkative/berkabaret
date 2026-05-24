@@ -1,0 +1,4 @@
+---
+const isAuthenticated = Astro.cookies.get('admin_session')?.value === 'true';
+return Astro.redirect(isAuthenticated ? '/admin/orders' : '/admin/login');
+---
