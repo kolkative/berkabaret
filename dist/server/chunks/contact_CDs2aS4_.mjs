@@ -1,9 +1,8 @@
-/* empty css               */
-import { c as createComponent } from './astro-component_BR1ZQvN3.mjs';
+import { c as createComponent } from './astro-component_BxIlvnV1.mjs';
 import 'piccolore';
-import { r as renderComponent, s as renderTemplate, n as maybeRenderHead } from './server_Ca08wFV-.mjs';
-import { r as renderScript } from './script_CMIWVZ91.mjs';
-import { $ as $$Base } from './Base_1oWikkFE.mjs';
+import { r as renderComponent, q as renderTemplate, n as maybeRenderHead } from './server_COGFvjq1.mjs';
+import { r as renderScript } from './script_BpG26VR7.mjs';
+import { $ as $$Base } from './Base_Uz_3_hmj.mjs';
 
 const $$Contact = createComponent(async ($$result, $$props, $$slots) => {
   return renderTemplate`${renderComponent($$result, "Base", $$Base, { "title": "Kontak — BERKABARET", "description": "Hubungi BERKABARET melalui email atau isi form kontak minimalis." }, { "default": async ($$result2) => renderTemplate` ${maybeRenderHead()}<section class="mx-auto max-w-5xl px-4 py-16 sm:py-20"> <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start"> <div> <p class="mb-3 text-sm uppercase tracking-[0.2em] text-brand-300">Kontak</p> <h1 class="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">

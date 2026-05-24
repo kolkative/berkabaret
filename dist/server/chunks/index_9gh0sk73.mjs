@@ -1,7 +1,6 @@
-/* empty css               */
-import { c as createComponent } from './astro-component_BR1ZQvN3.mjs';
+import { c as createComponent } from './astro-component_BxIlvnV1.mjs';
 import 'piccolore';
-import './server_Ca08wFV-.mjs';
+import './server_COGFvjq1.mjs';
 import 'clsx';
 
 const $$Index = createComponent(($$result, $$props, $$slots) => {
