@@ -1,12 +1,12 @@
 {
-  "name": "ticketing-app",
+  "name": "berkabaret",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "start": "HOST=0.0.0.0 PORT=${PORT:-3000} node dist/server/entry.mjs"
+    "start": "node server.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^8.3.4",
