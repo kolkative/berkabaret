@@ -1,0 +1,116 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { supabaseAdmin } from '../../../lib/supabase';
+
+const { order_code } = Astro.params;
+const { data: order } = await supabaseAdmin
+  .from('orders')
+  .select('*, events(title, venue, date_start)')
+  .eq('order_code', order_code)
+  .single();
+
+if (!order) return Astro.redirect('/events');
+if (order.status === 'PAID') return Astro.redirect(`/orders/${order_code}/success`);
+if (order.status === 'EXPIRED') return Astro.redirect(`/orders/${order_code}/expired`);
+---
+<Base title="Selesaikan Pembayaran — BERKABARET">
+  <div class="max-w-lg mx-auto px-4 py-16 text-center">
+    <!-- Timer -->
+    <div class="inline-flex items-center gap-2 bg-yellow-900/30 border border-yellow-700/40 text-yellow-300 text-sm font-medium px-4 py-2 rounded-full mb-8">
+      ⏱ Selesaikan dalam: <span id="countdown" class="font-mono font-bold">15:00</span>
+    </div>
+
+    <h1 class="font-display font-extrabold text-3xl mb-2">Scan & Bayar</h1>
+    <p class="text-gray-500 mb-8">Scan QR di bawah dengan aplikasi bank atau e-wallet apapun</p>
+
+    <!-- Payment box -->
+    <div class="bg-dark-800 border border-dark-600/50 rounded-2xl p-8 mb-6">
+      <!-- Order info -->
+      <div class="text-left mb-6 pb-6 border-b border-dark-600/50 space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Event</span>
+          <span class="text-white font-medium">{order.events?.title}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Tiket</span>
+          <span class="text-white">{order.ticket_type_name} × {order.quantity}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Kode Order</span>
+          <span class="text-white font-mono text-xs">{order.order_code}</span>
+        </div>
+        <div class="flex justify-between text-sm font-bold">
+          <span class="text-gray-300">Total</span>
+          <span class="text-brand-400 font-mono">Rp {order.total_amount.toLocaleString('id-ID')}</span>
+        </div>
+      </div>
+
+      <!-- QRIS via iframe dari Mayar -->
+      {order.mayar_payment_url ? (
+        <div class="bg-white rounded-xl p-4 flex items-center justify-center min-h-[260px]">
+          <iframe
+            src={order.mayar_payment_url}
+            class="w-full h-64 border-none"
+            title="QRIS Payment"
+          ></iframe>
+        </div>
+      ) : (
+        <div class="bg-white rounded-xl p-6 text-center text-gray-800">
+          <p class="text-sm">Halaman pembayaran tidak tersedia.</p>
+          <a href={order.mayar_payment_url} target="_blank" class="text-brand-600 underline text-sm">
+            Buka di tab baru →
+          </a>
+        </div>
+      )}
+
+      <!-- Tombol buka di tab baru -->
+      <a
+        href={order.mayar_payment_url}
+        target="_blank"
+        class="mt-4 block w-full bg-dark-700 hover:bg-dark-600 text-white text-sm font-medium py-3 rounded-xl transition-colors"
+      >
+        🔗 Buka halaman pembayaran
+      </a>
+    </div>
+
+    <!-- Status polling -->
+    <div id="statusCheck" class="text-gray-500 text-sm flex items-center justify-center gap-2">
+      <span class="inline-block w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+      Menunggu konfirmasi pembayaran...
+    </div>
+  </div>
+</Base>
+
+<script define:vars={{ orderCode: order.order_code, expiredAt: order.expired_at }}>
+  // Countdown timer
+  const expiry = new Date(expiredAt).getTime();
+  const countdownEl = document.getElementById('countdown');
+
+  const timer = setInterval(() => {
+    const remaining = Math.max(0, expiry - Date.now());
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    countdownEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    if (remaining === 0) {
+      clearInterval(timer);
+      window.location.href = `/orders/${orderCode}/expired`;
+    }
+  }, 1000);
+
+  // Poll status setiap 5 detik
+  const poll = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/orders/status?code=${orderCode}`);
+      const data = await res.json();
+      if (data.status === 'PAID') {
+        clearInterval(poll);
+        clearInterval(timer);
+        window.location.href = `/orders/${orderCode}/success`;
+      } else if (data.status === 'EXPIRED') {
+        clearInterval(poll);
+        clearInterval(timer);
+        window.location.href = `/orders/${orderCode}/expired`;
+      }
+    } catch {}
+  }, 5000);
+</script>
