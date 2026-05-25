@@ -36,7 +36,9 @@ export async function createMayarInvoice(params: {
     throw new Error(`Mayar API error: ${JSON.stringify(error)}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log('MAYAR RESPONSE:', JSON.stringify(result, null, 2));
+  return result;
 }
 
 export function verifyMayarWebhook(payload: string, signature: string): boolean {
