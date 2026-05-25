@@ -58,7 +58,7 @@ export const POST: APIRoute = async ({ request }) => {
           expiredAt,
         });
         mayarInvoiceId = mayarRes.data?.id ?? mayarRes.id;
-        mayarPaymentUrl = mayarRes.data?.paymentUrl ?? mayarRes.paymentUrl;
+        mayarPaymentUrl = mayarRes.data?.link ?? mayarRes.link;
       } catch (err) {
         console.error('Mayar error:', err);
         return new Response(JSON.stringify({ message: 'Gagal membuat invoice pembayaran' }), { status: 500 });
