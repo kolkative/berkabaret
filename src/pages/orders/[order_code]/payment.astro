@@ -45,32 +45,33 @@ if (order.status === 'EXPIRED') return Astro.redirect(`/orders/${order_code}/exp
         </div>
       </div>
 
-      <!-- QRIS via iframe dari Mayar -->
+      <!-- Mayar Embeddable Checkout -->
       {order.mayar_payment_url ? (
-        <div class="bg-white rounded-xl p-4 flex items-center justify-center min-h-[260px]">
-          <iframe
-            src={order.mayar_payment_url}
-            class="w-full h-64 border-none"
-            title="QRIS Payment"
-          ></iframe>
-        </div>
-      ) : (
-        <div class="bg-white rounded-xl p-6 text-center text-gray-800">
-          <p class="text-sm">Halaman pembayaran tidak tersedia.</p>
-          <a href={order.mayar_payment_url} target="_blank" class="text-brand-600 underline text-sm">
-            Buka di tab baru →
+        <div class="mt-2 space-y-3">
+          <!-- Tombol utama: popup Mayar -->
+          <a
+            class="mayar-button block w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 rounded-xl text-center transition-colors cursor-pointer"
+            href={order.mayar_payment_url}
+            data-scrolling="true"
+          >
+            💳 Bayar Sekarang
+          </a>
+          <!-- Fallback: buka di tab baru -->
+          <a
+            href={order.mayar_payment_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block w-full bg-dark-700 hover:bg-dark-600 text-white text-sm font-medium py-3 rounded-xl text-center transition-colors"
+          >
+            🔗 Buka halaman pembayaran
           </a>
         </div>
+      ) : (
+        <div class="bg-dark-700 rounded-xl p-6 text-center text-gray-400">
+          <p class="text-sm">Link pembayaran tidak tersedia.</p>
+          <p class="text-xs mt-1">Silakan hubungi panitia.</p>
+        </div>
       )}
-
-      <!-- Tombol buka di tab baru -->
-      <a
-        href={order.mayar_payment_url}
-        target="_blank"
-        class="mt-4 block w-full bg-dark-700 hover:bg-dark-600 text-white text-sm font-medium py-3 rounded-xl transition-colors"
-      >
-        🔗 Buka halaman pembayaran
-      </a>
     </div>
 
     <!-- Status polling -->
